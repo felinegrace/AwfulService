@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Awful.Utility;
 using System.Collections.Concurrent;
+using Awful.Utility;
+using Awful.Configurator;
 
 namespace Awful.Scheduler
 {
@@ -26,6 +27,13 @@ namespace Awful.Scheduler
             : this(defaultPeekInterval)
         {
             
+        }
+
+        public AwfulScheduler(int peekInterval)
+        {
+            this.peekInterval = peekInterval;
+
+
             pendingTask = new PriorityQueue<DateTime, AwfulTask>();
             priorityQueueLock = new object();
 
@@ -34,16 +42,18 @@ namespace Awful.Scheduler
 
             thread = new Thread(AwfulScheduler.invokeScheduler);
             terminateEvent = new ManualResetEvent(false);
-        }
 
-        public AwfulScheduler(int peekInterval)
-        {
-            this.peekInterval = peekInterval;
+            Taskbuilder builder = new Taskbuilder(new ConfigParserJSON().parse());
+            foreach(AwfulTask t in builder.taskList)
+            {
+                prepareTask(t);
+            }
         }
 
         public void start()
         {
             thread.Start(this);
+            
         }
 
         public void stop()

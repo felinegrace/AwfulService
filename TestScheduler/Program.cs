@@ -17,15 +17,15 @@ namespace TestScheduler
         {
             Logger.enable();
             AwfulScheduler s = new AwfulScheduler();
-            for (int a = 0; a < 100; a++)
-            {
-                AwfulFileBackupTask t = new AwfulFileBackupTask(a.ToString(), DateTime.Now, new TimeSpan(0, 0, 10));
-                Thread.Sleep(100);
-                s.prepareTask(t);
-                if(a == 0)
-                    s.prepareTask(t);
-            }
-
+            //for (int a = 0; a < 100; a++)
+            //{
+            //    AwfulFileBackupTask t = new AwfulFileBackupTask(a.ToString(), DateTime.Now, new TimeSpan(0, 0, 10));
+            //    Thread.Sleep(100);
+            //    s.prepareTask(t);
+            //    if(a == 0)
+            //        s.prepareTask(t);
+            //}
+           
             s.start();
         }
     }
