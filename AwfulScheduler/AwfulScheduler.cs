@@ -23,6 +23,7 @@ namespace Awful.Scheduler
         private ConcurrentDictionary<Guid, AwfulTask> runningTask = null;
         private ConcurrentQueue<AwfulTask> finishedTask = null;
 
+        private TaskBuilder taskBuilder = null;
         public AwfulScheduler()
             : this(defaultPeekInterval)
         {
@@ -33,7 +34,6 @@ namespace Awful.Scheduler
         {
             this.peekInterval = peekInterval;
 
-
             pendingTask = new PriorityQueue<DateTime, AwfulTask>();
             priorityQueueLock = new object();
 
@@ -43,8 +43,9 @@ namespace Awful.Scheduler
             thread = new Thread(AwfulScheduler.invokeScheduler);
             terminateEvent = new ManualResetEvent(false);
 
-            Taskbuilder builder = new Taskbuilder(new ConfigParserJSON().parse());
-            foreach(AwfulTask t in builder.taskList)
+            taskBuilder = new TaskBuilder();
+            taskBuilder.rebuild();
+            foreach (AwfulTask t in taskBuilder.taskList)
             {
                 prepareTask(t);
             }

@@ -7,21 +7,36 @@ using Awful.Configurator;
 
 namespace Awful.Scheduler
 {
-    class Taskbuilder
+    class TaskBuilder
     {
-        public List<AwfulTask> taskList { get; set; }
-        private TaskConfig taskConfig { get; set; }
-        public Taskbuilder(List<TaskConfig> configList)
+        public List<AwfulTask> taskList { get; private set; }
+        public TaskBuilder()
         {
             taskList = new List<AwfulTask>();
-            foreach(TaskConfig cfg in configList)
+        }
+
+        public void build()
+        {
+            IConfigParser configParser = ConfigLoader.getParserInstance(ConfigLoader.ConfigParserFormat.JSON);
+            List<TaskConfig> configList = configParser.parse();
+            if(configList != null)
             {
-                AwfulTask task = buildTaskFromConfig(cfg);
-                if(task != null)
+                foreach (TaskConfig cfg in configList)
                 {
-                    taskList.Add(task);
+                    AwfulTask task = buildTaskFromConfig(cfg);
+                    if (task != null)
+                    {
+                        taskList.Add(task);
+                    }
                 }
             }
+            
+        }
+
+        public void rebuild()
+        {
+            taskList.Clear();
+            build();
         }
 
         private AwfulTask buildTaskFromConfig(TaskConfig config)

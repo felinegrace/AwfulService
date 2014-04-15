@@ -5,8 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Awful.Scheduler
 {
+    //this is not a thread-safe data struct
     class PriorityQueue<TPriority, TValue> //: ICollection , IEnumerable<PriorityQueue<TPriority, TValue>>
     {
         private SortedDictionary<TPriority, Queue<TValue>> peripheral = new SortedDictionary<TPriority, Queue<TValue>>();
@@ -23,21 +25,35 @@ namespace Awful.Scheduler
 
         public TValue dequeue()
         {
-            // will throw if there isn’t any first element!
-            var central = peripheral.First();
-            var value = central.Value.Dequeue();
-            // nothing left of the top priority.
-            if (central.Value.Count == 0) 
-                peripheral.Remove(central.Key);
-            return value;
+            try
+            {
+                // will throw if there isn’t any first element!
+                var central = peripheral.First();
+                var value = central.Value.Dequeue();
+                // nothing left of the top priority.
+                if (central.Value.Count == 0)
+                    peripheral.Remove(central.Key);
+                return value;
+            }
+            catch (Exception exception)
+            {
+                return default(TValue);
+            }
         }
 
         public TValue peek()
         {
-            // will throw if there isn’t any first element!
-            var central = peripheral.First();
-            var value = central.Value.Peek();
-            return value;
+            try
+            {
+                // will throw if there isn’t any first element!
+                var central = peripheral.First();
+                var value = central.Value.Peek();
+                return value;
+            }
+            catch(Exception exception)
+            {
+                return default(TValue);
+            }
         }
 
         public bool empty()
