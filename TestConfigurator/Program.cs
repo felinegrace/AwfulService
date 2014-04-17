@@ -13,13 +13,6 @@ namespace TestConfigurator
         static void Main(string[] args)
         {
             Logger.enable();
-            Configurator c = new Configurator();
-            TaskConfig j = c.readJsonFromFile();
-            Logger.debug(j.respawnSpan);
-            Logger.debug(j.launchDay.ElementAt<string>(0));
-            Logger.debug(j.launchTime);
-            Logger.debug(j.srcFolders.ElementAt<string>(0));
-            Logger.debug(j.dstFolder.ElementAt<string>(0));
         }
     }
 }

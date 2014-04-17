@@ -9,16 +9,13 @@ using Awful.Configurator.Entity;
 using System.Threading;
 namespace TestScheduler
 {
-
-    
-
     class Program
     {
         static void Main(string[] args)
         {
             Logger.enable();
             AwfulScheduler s = new AwfulScheduler();
-
+            /*
             for (int a = 0; a < 100; a++)
             {
                 AwfulFileBackupConfig c = new AwfulFileBackupConfig();
@@ -34,7 +31,7 @@ namespace TestScheduler
                 if (a == 0)
                     s.prepareTask(t);
             }
-           
+            */
             s.start();
         }
     }

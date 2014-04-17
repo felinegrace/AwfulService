@@ -18,7 +18,7 @@ namespace Awful.Scheduler
 
         public void build()
         {
-            IConfigParser configParser = ConfigLoader.getParserInstance(ConfigLoader.ConfigParserFormat.JSON);
+            IConfigParser configParser = ConfigLoader.getParserInstance(ConfigLoader.ConfigParserFormat.XML);
             List<AwfulTaskConfigBase> configList = configParser.parse();
             if(configList != null)
             {
