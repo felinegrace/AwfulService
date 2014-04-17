@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Awful.Utility;
 
 namespace Awful.Scheduler
 {
@@ -37,6 +37,7 @@ namespace Awful.Scheduler
             }
             catch (Exception exception)
             {
+                Logger.debug("PriorityQueue: no elements. {0}", exception.Message);
                 return default(TValue);
             }
         }
@@ -52,6 +53,7 @@ namespace Awful.Scheduler
             }
             catch(Exception exception)
             {
+                Logger.debug("PriorityQueue: no elements. {0}",exception.Message);
                 return default(TValue);
             }
         }

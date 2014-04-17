@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Awful.Scheduler
+namespace Awful.Configurator.Entity
 {
-    public class AwfulIdentifier
+    public class Identifier
     {
         public Guid guid { get; set; }
         public string descriptor { get; set; }

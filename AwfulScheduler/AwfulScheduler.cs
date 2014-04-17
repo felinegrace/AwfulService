@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using Awful.Utility;
 using Awful.Configurator;
+using Awful.Configurator.Entity;
 
 namespace Awful.Scheduler
 {
@@ -87,9 +88,9 @@ namespace Awful.Scheduler
         {
             if (contains(task))
             {
-                Logger.debug("AwfulScheduler: duplicated new task : {0} , it will be launched after {1:s}",
-                    task.identifier.descriptor,
-                    task.scheduledTime);
+                Logger.debug("AwfulScheduler: duplicated new task : {0} , it will be launched after {1}",
+                    task.getConfig().identifier.descriptor,
+                    task.getConfig().scheduledDateTime);
                 return;
             }
             else
@@ -97,9 +98,11 @@ namespace Awful.Scheduler
                 task.observer = this;
                 lock (priorityQueueLock)
                 {
-                    pendingTask.enqueue(task.scheduledTime , task);
+                    pendingTask.enqueue(task.getConfig().scheduledDateTime, task);
                 }
-                Logger.debug("AwfulScheduler: accept new task : {0}", task.identifier.descriptor);
+                Logger.debug("AwfulScheduler: accept new task : {0} , it will be launched after {1}",
+                    task.getConfig().identifier.descriptor,
+                    task.getConfig().scheduledDateTime);
             }
         }
 
@@ -110,7 +113,7 @@ namespace Awful.Scheduler
             {
                 if (pendingTask.empty() == false)
                 {
-                    if (pendingTask.peek().scheduledTime < DateTime.Now)
+                    if (pendingTask.peek().getConfig().scheduledDateTime < DateTime.Now)
                         return pendingTask.dequeue();
                 }
             }
@@ -129,17 +132,45 @@ namespace Awful.Scheduler
                 AwfulTask task = null;
                 if (finishedTask.TryDequeue(out task) == true)
                 {
-                    Logger.debug("AwfulScheduler: task {0} disposed.", task.identifier.descriptor);
-                    if (task.isRespawnable)
+                    Logger.debug("AwfulScheduler: task {0} disposed.", task.getConfig().identifier.descriptor);
+                    if (task.getConfig().isRespawnable())
                     {
-                        DateTime nextRespawn = task.scheduledTime;
-                        while (nextRespawn <= DateTime.Now)
+                        DateTime nextRespawn = task.getConfig().scheduledDateTime;
+                        
+                        switch(task.getConfig().respawnSpan)
                         {
-                            nextRespawn += task.respawnTime;
+                            //monthly increase depends on current month
+                            // muti whiles cannot be extracted.
+                            case Enumration.RespawnSpanType.MONTHLY:
+                                while (nextRespawn <= DateTime.Now)
+                                {
+                                    nextRespawn += new TimeSpan(DateTime.DaysInMonth(nextRespawn.Year , nextRespawn.Month), 0, 0, 0);
+                                }
+                                break;
+                            case Enumration.RespawnSpanType.WEEKLY:
+                                while (nextRespawn <= DateTime.Now)
+                                {
+                                    nextRespawn += new TimeSpan( 7 , 0 , 0 , 0);
+                                }
+                                break;
+                            case Enumration.RespawnSpanType.DAYLY:
+                                while (nextRespawn <= DateTime.Now)
+                                {
+                                    nextRespawn += new TimeSpan( 1 , 0 , 0 , 0);
+                                }
+                                break;
+                            case Enumration.RespawnSpanType.MINUTELY:
+                                while (nextRespawn <= DateTime.Now)
+                                {
+                                    nextRespawn += new TimeSpan(0, 0, 1, 0);
+                                }
+                                break;
                         }
-                        task.scheduledTime = nextRespawn;
+                        task.getConfig().scheduledDateTime = nextRespawn;
                         prepareTask(task);
-                        Logger.debug("AwfulScheduler: task {0} respawned.", task.identifier.descriptor);
+                        Logger.debug("AwfulScheduler: task {0} respawned, next launch will be at {1}.", 
+                            task.getConfig().identifier.descriptor,
+                            nextRespawn);
                     }
                 }
                 else
@@ -152,19 +183,21 @@ namespace Awful.Scheduler
 
         private void taskLaunch(AwfulTask task)
         {
-            Logger.debug("AwfulScheduler: launching task : {0}", task.identifier.descriptor);
-            if (runningTask.TryAdd(task.identifier.guid, task) == true)
+            Logger.debug("AwfulScheduler: launching task : {0}", task.getConfig().identifier.descriptor);
+            if (runningTask.TryAdd(task.getConfig().identifier.guid, task) == true)
             {
                 task.start();
-                Logger.debug("AwfulScheduler: task {0} launched.", task.identifier.descriptor);
+                Logger.debug("AwfulScheduler: task {0} launched.", task.getConfig().identifier.descriptor);
             }
             else
             {
-                Logger.error("AwfulScheduler: task {0} cannot be added into running list.", task.identifier.descriptor);
+                Logger.error("AwfulScheduler: task {0} cannot be added into running list. a task with same Guid:{1} may already exists.",
+                task.getConfig().identifier.descriptor,
+                task.getConfig().identifier.guid);
             }
         }
 
-        public void onTaskComplete(AwfulIdentifier identifier)
+        public void onTaskComplete(Identifier identifier)
         {
 
             Logger.debug("AwfulScheduler: on task {0} complete.", identifier.descriptor);
@@ -189,8 +222,8 @@ namespace Awful.Scheduler
             lock (priorityQueueLock)
             {
                 return
-                    pendingTask.containsPair(task.scheduledTime , task)
-                    || runningTask.ContainsKey(task.identifier.guid)
+                    pendingTask.containsPair(task.getConfig().scheduledDateTime, task)
+                    || runningTask.ContainsKey(task.getConfig().identifier.guid)
                     || finishedTask.Contains(task);
             }
         }

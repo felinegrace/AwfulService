@@ -7,42 +7,24 @@ using Awful.Utility;
 using System.Threading;
 using System.IO;
 using System.Text.RegularExpressions;
+using Awful.Configurator.Entity;
 
 namespace Awful.Scheduler
 {
     public class AwfulFileBackupTask : AwfulTask
     {
-        private DateTime lastLaunch;
-        public List<string> srcFolders { get; set; }
-        public List<string> dstFolders { get; set; }
-        protected void setFolders(List<string> srcFolders, List<string> dstFolders)
+        private AwfulFileBackupConfig config { get; set; }
+        
+        //config object ownership should be taken
+        public AwfulFileBackupTask(AwfulFileBackupConfig config)
         {
-            this.srcFolders = srcFolders;
-            this.dstFolders = dstFolders;
-        }
-        public AwfulFileBackupTask(string descriptor, List<string> srcFolders, List<string> dstFolders)
-            : base(descriptor)
-        {
-            this.lastLaunch = new DateTime(0);
-            setFolders(srcFolders , dstFolders);
-        }
-
-        public AwfulFileBackupTask(string descriptor, DateTime scheduledTime, List<string> srcFolders, List<string> dstFolders)
-            : base(descriptor, scheduledTime)
-        {
-            setFolders(srcFolders, dstFolders);
-        }
-
-        public AwfulFileBackupTask(string descriptor, DateTime scheduledTime, TimeSpan respawnTime, List<string> srcFolders, List<string> dstFolders)
-            : base(descriptor, scheduledTime, respawnTime)
-        {
-            setFolders(srcFolders, dstFolders);
+            this.config = config;
         }
 
         protected override void run()
         {
-            Logger.debug("{0} running , last launch is {1}.", identifier.descriptor, lastLaunch);
-            var folderPairs = srcFolders.Zip(dstFolders, (s, d) => new { src = s, dst = d });
+            Logger.debug("{0} running , last launch is {1}.", config.identifier.descriptor, config.lastLaunch);
+            var folderPairs = config.srcFolders.Zip(config.dstFolders, (s, d) => new { src = s, dst = d });
             foreach(var pair in folderPairs)
             { 
                 DirectoryInfo srcInfo = new DirectoryInfo(pair.src);
@@ -54,14 +36,19 @@ namespace Awful.Scheduler
                 Logger.debug("recursive copying {0} to {1}.", pair.src, pair.dst);
                 recursiveCopy(srcInfo, new DirectoryInfo(pair.dst), null);
             }
-            Logger.debug("{0} done." , identifier.descriptor);
-            
-            lastLaunch = this.scheduledTime;
+            Logger.debug("{0} done.", config.identifier.descriptor);
+
+            config.lastLaunch = config.scheduledDateTime;
         }
 
         protected override void cancel()
         {
             throw new NotImplementedException();
+        }
+
+        public override AwfulTaskConfigBase getConfig()
+        {
+            return config;
         }
 
         private void recursiveCopy(DirectoryInfo source, DirectoryInfo target, params string[] excludePatterns)
@@ -93,7 +80,7 @@ namespace Awful.Scheduler
             // Go ahead and copy each file to the target directory
             foreach (FileInfo file in source.GetFiles())
             {
-                if(file.LastAccessTime >= lastLaunch && file.LastAccessTime < scheduledTime)
+                if (file.LastAccessTime >= config.lastLaunch && file.LastAccessTime < config.scheduledDateTime)
                 {
                     var fileName = file.Name;
                     var shouldExclude = false;

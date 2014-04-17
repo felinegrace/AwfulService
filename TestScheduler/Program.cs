@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Awful.Scheduler;
 using Awful.Utility;
+using Awful.Configurator.Entity;
 using System.Threading;
 namespace TestScheduler
 {
@@ -17,14 +18,22 @@ namespace TestScheduler
         {
             Logger.enable();
             AwfulScheduler s = new AwfulScheduler();
-            //for (int a = 0; a < 100; a++)
-            //{
-            //    AwfulFileBackupTask t = new AwfulFileBackupTask(a.ToString(), DateTime.Now, new TimeSpan(0, 0, 10));
-            //    Thread.Sleep(100);
-            //    s.prepareTask(t);
-            //    if(a == 0)
-            //        s.prepareTask(t);
-            //}
+
+            for (int a = 0; a < 100; a++)
+            {
+                AwfulFileBackupConfig c = new AwfulFileBackupConfig();
+                c.scheduledDateTime = DateTime.Now;
+                c.respawnSpan = Enumration.RespawnSpanType.MINUTELY;
+                c.srcFolders = new List<string>();
+                c.dstFolders = new List<string>();
+                c.identifier.descriptor = a.ToString();
+                c.identifier.guid = Guid.NewGuid();
+                AwfulFileBackupTask t = new AwfulFileBackupTask(c);
+                Thread.Sleep(100);
+                s.prepareTask(t);
+                if (a == 0)
+                    s.prepareTask(t);
+            }
            
             s.start();
         }

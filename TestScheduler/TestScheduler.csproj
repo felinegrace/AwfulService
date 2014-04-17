@@ -49,6 +49,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AwfulConfigEntity\AwfulConfigEntity.csproj">
+      <Project>{025206fc-8466-4cfa-a3cb-31c4fa5ddd64}</Project>
+      <Name>AwfulConfigEntity</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AwfulScheduler\AwfulScheduler.csproj">
       <Project>{fb12e36b-4ad7-4f29-906a-01a027bf1f5d}</Project>
       <Name>AwfulScheduler</Name>

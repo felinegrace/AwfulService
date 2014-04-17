@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Awful.Configurator;
+using Awful.Configurator.Entity;
 
 namespace Awful.Scheduler
 {
@@ -18,10 +19,10 @@ namespace Awful.Scheduler
         public void build()
         {
             IConfigParser configParser = ConfigLoader.getParserInstance(ConfigLoader.ConfigParserFormat.JSON);
-            List<TaskConfig> configList = configParser.parse();
+            List<AwfulTaskConfigBase> configList = configParser.parse();
             if(configList != null)
             {
-                foreach (TaskConfig cfg in configList)
+                foreach (AwfulTaskConfigBase cfg in configList)
                 {
                     AwfulTask task = buildTaskFromConfig(cfg);
                     if (task != null)
@@ -39,20 +40,19 @@ namespace Awful.Scheduler
             build();
         }
 
-        private AwfulTask buildTaskFromConfig(TaskConfig config)
+        private AwfulTask buildTaskFromConfig(AwfulTaskConfigBase config)
         {
-            AwfulTask task = null;
-            if(config.respawnSpan == "dayly")
+            switch(config.type)
             {
-                task = new AwfulFileBackupTask(
-                    config.name,
-                    config.launchDateTime,
-                    new TimeSpan(24 , 0 , 0),
-                    config.srcFolders,
-                    config.dstFolders
-                    );
+                case Enumration.TaskType.FILE_BACKUP:
+                    return new AwfulFileBackupTask(config as AwfulFileBackupConfig);
+                case Enumration.TaskType.DATABASE_BACKUP:
+                    return null;
+                default:
+                    return null;
             }
-            return task;
         }
+
+        
     }
 }
