@@ -33,14 +33,11 @@ namespace Awful.Scheduler
                     Logger.debug("source folder {0} not exist , skpping...", pair.src);
                     continue;
                 }
-                
 
                 //replace %d macro to yyyymmdd
-                string macroReplace = String.Format("{0:D4}{1:D2}{2:D2}",
-                    config.scheduledDateTime.Year, config.scheduledDateTime.Month, config.scheduledDateTime.Day);
-                string translateDestination = pair.dst.Replace("%d", macroReplace);
+                string translateDestination = config.replaceMacroOfDate(pair.dst, config.scheduledDateTime);
                 Logger.debug("recursive copying {0} to {1}.", pair.src, translateDestination);
-                recursiveCopy(config.backupType, srcInfo, new DirectoryInfo(translateDestination), null);
+                recursiveCopy(config.fileBackupMethod, srcInfo, new DirectoryInfo(translateDestination), null);
             }
             Logger.debug("{0} done.", config.identifier.descriptor);
 
@@ -57,7 +54,7 @@ namespace Awful.Scheduler
             return config;
         }
 
-        private void recursiveCopy(Enumration.BackupType backupType, DirectoryInfo source, DirectoryInfo target, params string[] excludePatterns)
+        private void recursiveCopy(Enumration.FileBackupMethod backupType, DirectoryInfo source, DirectoryInfo target, params string[] excludePatterns)
         {
             if (target.FullName.Contains(source.FullName))
                 return;
@@ -87,7 +84,7 @@ namespace Awful.Scheduler
             foreach (FileInfo file in source.GetFiles())
             {
                 bool shouldBackup = true;
-                if (backupType == Enumration.BackupType.INCREMENTAL)
+                if (backupType == Enumration.FileBackupMethod.INCREMENTAL)
                 {
                     if (file.LastAccessTime < config.lastLaunch || file.LastAccessTime >= config.scheduledDateTime)
                     {

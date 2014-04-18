@@ -28,6 +28,8 @@ namespace Awful.Scheduler
 
         internal static void invokeTask(object task)
         {
+            //task runtime error will be caught here.
+            //terminate this thread if it happens.
             AwfulTask transTask = task as AwfulTask;
             try
             {

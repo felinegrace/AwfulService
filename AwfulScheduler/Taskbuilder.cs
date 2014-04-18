@@ -18,7 +18,9 @@ namespace Awful.Scheduler
 
         public void build()
         {
+            //this MUST NOT throw exception, crash me if it happens.
             IConfigParser configParser = ConfigLoader.getParserInstance(ConfigLoader.ConfigParserFormat.XML);
+
             List<AwfulTaskConfigBase> configList = configParser.parse();
             if(configList != null)
             {
@@ -47,7 +49,7 @@ namespace Awful.Scheduler
                 case Enumration.TaskType.FILE_BACKUP:
                     return new AwfulFileBackupTask(config as AwfulFileBackupConfig);
                 case Enumration.TaskType.DATABASE_BACKUP:
-                    return null;
+                    return new AwfulDatabaseBackupTask(config as AwfulDatabaseBackupConfig);
                 default:
                     return null;
             }

@@ -11,6 +11,7 @@ using Awful.Configurator.Entity;
 
 namespace Awful.Scheduler
 {
+    //crash me if any exception thrown
     public class AwfulScheduler : AwfulTaskObserver
     {
         private Thread thread = null;
