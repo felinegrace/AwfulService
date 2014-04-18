@@ -15,7 +15,7 @@ namespace Awful.Scheduler
     public class AwfulScheduler : AwfulTaskObserver
     {
         private Thread thread = null;
-        private ManualResetEvent terminateEvent = null;
+        private AutoResetEvent terminateEvent = null;
         private int peekInterval;
         private static int defaultPeekInterval = 1000;
         //WARNING: priority queue is not a thread safe implemention
@@ -42,8 +42,7 @@ namespace Awful.Scheduler
             runningTask = new ConcurrentDictionary<Guid, AwfulTask>();
             finishedTask = new ConcurrentQueue<AwfulTask>();
 
-            thread = new Thread(AwfulScheduler.invokeScheduler);
-            terminateEvent = new ManualResetEvent(false);
+            terminateEvent = new AutoResetEvent(false);
 
             taskBuilder = new TaskBuilder();
             taskBuilder.rebuild();
@@ -55,13 +54,17 @@ namespace Awful.Scheduler
 
         public void start()
         {
+            thread = new Thread(AwfulScheduler.invokeScheduler);
             thread.Start(this);
-            
         }
 
         public void stop()
         {
             terminateEvent.Set();
+            foreach(KeyValuePair<Guid,AwfulTask> pair in runningTask)
+            {
+                pair.Value.stop();
+            }
         }
 
         private static void invokeScheduler(object scheduler)

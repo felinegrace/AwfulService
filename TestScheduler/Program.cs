@@ -32,7 +32,21 @@ namespace TestScheduler
                     s.prepareTask(t);
             }
             */
-            s.start();
+
+            ConsoleKeyInfo ch;
+            do
+            {
+                ch = Console.ReadKey();
+                switch(ch.Key)
+                {
+                    case ConsoleKey.S:
+                        s.start();
+                        break;
+                    case ConsoleKey.T:
+                        s.stop();
+                        break;
+                }
+            } while (ch.Key != ConsoleKey.Q);
         }
     }
     
