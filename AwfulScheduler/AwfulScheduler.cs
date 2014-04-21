@@ -17,7 +17,7 @@ namespace Awful.Scheduler
         private Thread thread = null;
         private AutoResetEvent terminateEvent = null;
         private int peekInterval;
-        private static int defaultPeekInterval = 1000;
+        private static int defaultPeekInterval = 30000;
         //WARNING: priority queue is not a thread safe implemention
         private PriorityQueue<DateTime , AwfulTask> pendingTask = null;
         private object priorityQueueLock = null;
