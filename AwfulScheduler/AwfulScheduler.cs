@@ -145,25 +145,25 @@ namespace Awful.Scheduler
                         {
                             //monthly increase depends on current month
                             // muti whiles cannot be extracted.
-                            case Enumration.RespawnSpanType.MONTHLY:
+                            case Enumeration.RespawnSpanType.MONTHLY:
                                 while (nextRespawn <= DateTime.Now)
                                 {
                                     nextRespawn += new TimeSpan(DateTime.DaysInMonth(nextRespawn.Year , nextRespawn.Month), 0, 0, 0);
                                 }
                                 break;
-                            case Enumration.RespawnSpanType.WEEKLY:
+                            case Enumeration.RespawnSpanType.WEEKLY:
                                 while (nextRespawn <= DateTime.Now)
                                 {
                                     nextRespawn += new TimeSpan( 7 , 0 , 0 , 0);
                                 }
                                 break;
-                            case Enumration.RespawnSpanType.DAYLY:
+                            case Enumeration.RespawnSpanType.DAYLY:
                                 while (nextRespawn <= DateTime.Now)
                                 {
                                     nextRespawn += new TimeSpan( 1 , 0 , 0 , 0);
                                 }
                                 break;
-                            case Enumration.RespawnSpanType.MINUTELY:
+                            case Enumeration.RespawnSpanType.MINUTELY:
                                 while (nextRespawn <= DateTime.Now)
                                 {
                                     nextRespawn += new TimeSpan(0, 0, 1, 0);

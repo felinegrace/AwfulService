@@ -104,14 +104,24 @@ namespace Awful.Scheduler
             if (shouldBackup && !shouldExclude)
             {
                 string dstFullName = Path.Combine(target.FullName, fileName);
-                Logger.debug("copying file {0} to {1}.", file.FullName, dstFullName);
-                file.CopyTo(dstFullName, true);
+                string dstFullNameTemp = dstFullName + ".awf";
+                Logger.debug("copying file {0} to {1}.", file.FullName, dstFullNameTemp);
+                file.CopyTo(dstFullNameTemp, true);
+                Logger.debug("renaming file {0} to {1}", dstFullNameTemp, dstFullName);
+                if (File.Exists(dstFullName))
+                {
+                    Logger.debug("try delete exsiting file {0}", dstFullName);
+                    System.IO.File.Delete(dstFullName);
+
+                }
+                new FileInfo(dstFullNameTemp).MoveTo(dstFullName);
+                Logger.debug("backup file {0} done.", dstFullName);
             }
         }
 
         private bool shouldBackupOnTheMethod(FileInfo file)
         {
-            if (config.fileBackupMethod == Enumration.FileBackupMethod.INCREMENTAL)
+            if (config.fileBackupMethod == Enumeration.FileBackupMethod.INCREMENTAL)
             {
                 if (file.LastAccessTime < config.lastLaunch || file.LastAccessTime >= config.scheduledDateTime)
                 {

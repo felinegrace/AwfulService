@@ -44,15 +44,8 @@ namespace Awful.Scheduler
 
         private AwfulTask buildTaskFromConfig(AwfulTaskConfigBase config)
         {
-            switch(config.type)
-            {
-                case Enumration.TaskType.FILE_BACKUP:
-                    return new AwfulFileBackupTask(config as AwfulFileBackupConfig);
-                case Enumration.TaskType.DATABASE_BACKUP:
-                    return new AwfulDatabaseBackupTask(config as AwfulDatabaseBackupConfig);
-                default:
-                    return null;
-            }
+            Object[]  constructParms  =  new  object[]  {config};
+            return Activator.CreateInstance(config.businussObject, constructParms) as AwfulTask;
         }
 
         

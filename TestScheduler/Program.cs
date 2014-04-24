@@ -20,7 +20,7 @@ namespace TestScheduler
             {
                 AwfulFileBackupConfig c = new AwfulFileBackupConfig();
                 c.scheduledDateTime = DateTime.Now;
-                c.respawnSpan = Enumration.RespawnSpanType.MINUTELY;
+                c.respawnSpan = Enumeration.RespawnSpanType.MINUTELY;
                 c.srcFolders = new List<string>();
                 c.dstFolders = new List<string>();
                 c.identifier.descriptor = a.ToString();

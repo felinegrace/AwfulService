@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Awful.Scheduler
 {
-   public class AwfulDatabaseBackupTask : AwfulTask
+    public class AwfulDatabaseBackupTask : AwfulTask
     {
         private AwfulDatabaseBackupConfig config { get; set; }
 
@@ -21,28 +21,23 @@ namespace Awful.Scheduler
             this.config = config;
             command = new SqlCommand();
         }
+       
 
-        protected override void run()
+        void performBackup(Enumeration.DatabaseBackupMethod method)
         {
-            Logger.debug("{0} running , last launch is {1}.", config.identifier.descriptor, config.lastLaunch);
+            methodDependentPreparation();
 
-            
             //replace %d macro to yyyymmdd
-            string translateDestination = config.replaceMacroOfDate(config.dstFile, config.scheduledDateTime);
+            string translateDestination = methodDependentDstFileName();
+            string translateDestinationTemp = translateDestination + ".awf";
 
-            string backupMethod = null;
-            switch(config.databaseBackupMethod)
-            {
-                case Enumration.DatabaseBackupMethod.DIFFERENTIAL:
-                    backupMethod = ", DIFFERENTIAL";
-                    break;
-                case Enumration.DatabaseBackupMethod.FULL:
-                    backupMethod = "";
-                    break;
-            }
+            //methodDependentSql should be called after methodDependentDstFileName
+            //bad smell here
+            //adding methodDependentPreparation solves it 
+            string backupMethod = methodDependentSql();
 
-            string sql = string.Format("BACKUP DATABASE {0} TO disk='{1}' WITH INIT {2}", 
-                config.databaseName, translateDestination , backupMethod);
+            string sql = string.Format("BACKUP DATABASE {0} TO disk='{1}' WITH INIT {2}",
+                config.databaseName, translateDestinationTemp, backupMethod);
             Logger.debug("{0} executing: {1}.", config.identifier.descriptor, sql);
 
             SqlConnection conn = new SqlConnection(config.databaseConnectionString);
@@ -53,7 +48,7 @@ namespace Awful.Scheduler
             
             try
             {
-                string backupDirectory = Path.GetDirectoryName(translateDestination);
+                string backupDirectory = Path.GetDirectoryName(translateDestinationTemp);
                 if (!Directory.Exists(backupDirectory))
                 {
                     Directory.CreateDirectory(backupDirectory);
@@ -67,7 +62,59 @@ namespace Awful.Scheduler
                 conn.Dispose();
             }
             Logger.debug("{0} successfully executed: {1}.", config.identifier.descriptor, sql);
+            
+            
+            Logger.debug("renaming file {0} to {1}", translateDestinationTemp, translateDestination);
+            if (File.Exists(translateDestination))
+            {
+                Logger.debug("try delete exsiting file {0}", translateDestination);
+                System.IO.File.Delete(translateDestination);
+
+            }
+            new FileInfo(translateDestinationTemp).MoveTo(translateDestination);
+            Logger.debug("backup file {0} done.", translateDestination);
+
         }
+
+        protected virtual void methodDependentPreparation()
+        {
+            return;
+        }
+
+        protected string methodDependentSqlBySpecifiedMethod(Enumeration.DatabaseBackupMethod method)
+        {
+            switch (method)
+            {
+                case Enumeration.DatabaseBackupMethod.DIFFERENTIAL:
+                    return ", DIFFERENTIAL";
+                case Enumeration.DatabaseBackupMethod.FULL:
+                    return "";
+                 default:
+                    {
+                        Logger.error("task {0} reaches an untouchable method. crash this task.",config.identifier.descriptor);
+                        throw new Exception("critical task error.");
+                    }
+            }
+        }
+
+        protected virtual string methodDependentSql()
+        {
+            return methodDependentSqlBySpecifiedMethod(config.databaseBackupMethod);
+        }
+
+        protected virtual string methodDependentDstFileName()
+        {
+            return config.replaceMacroOfDate(config.dstFile, config.scheduledDateTime);
+        }
+
+        protected override void run()
+        {
+            Logger.debug("{0} running , last launch is {1}.", config.identifier.descriptor, config.lastLaunch);
+
+            performBackup(config.databaseBackupMethod);
+
+        }
+
 
         protected override void cancel()
         {
