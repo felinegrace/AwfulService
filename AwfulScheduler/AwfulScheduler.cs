@@ -213,7 +213,7 @@ namespace Awful.Scheduler
                     Logger.error("AwfulScheduler: task guid {0} remove failed from running list.", identifier.guid);
                 }
                 finishedTask.Enqueue(task);
-                Logger.debug("AwfulScheduler: task {0} finishing...", identifier.descriptor);
+                Logger.debug("AwfulScheduler: task {0} done.", identifier.descriptor);
             }
             else
             {
