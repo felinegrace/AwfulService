@@ -19,30 +19,35 @@ namespace Awful.Scheduler
         public AwfulFileBackupTask(AwfulFileBackupConfig config)
         {
             this.config = config;
+            shouldTerminate = false;
         }
 
         protected override void run()
         {
-            shouldTerminate = false;
             Logger.debug("{0} running , last launch is {1}.", config.identifier.descriptor, config.lastLaunch);
             var folderPairs = config.srcFolders.Zip(config.dstFolders, (s, d) => new { src = s, dst = d });
             foreach(var pair in folderPairs)
-            { 
-                DirectoryInfo srcInfo = new DirectoryInfo(pair.src);
+            {
+                if (shouldTerminate)
+                {
+                    Logger.debug("receive TERMINATE signal, exiting...");
+                    shouldTerminate = false;
+                    return;
+                }
+                string translateSource = config.replaceMacroOfDate(pair.src, config.scheduledDateTime);
+                DirectoryInfo srcInfo = new DirectoryInfo(translateSource);
                 if(!srcInfo.Exists)
                 {
-                    Logger.debug("source folder {0} not exist , skpping...", pair.src);
+                    Logger.debug("source folder {0} not exist , skpping...", translateSource);
                     continue;
                 }
 
                 //replace %d macro to yyyymmdd
                 string translateDestination = config.replaceMacroOfDate(pair.dst, config.scheduledDateTime);
-                Logger.debug("recursive copying {0} to {1}.", pair.src, translateDestination);
+                Logger.debug("recursive copying {0} to {1}.", translateSource, translateDestination);
                 recursiveCopy(srcInfo, new DirectoryInfo(translateDestination), null);
             }
             Logger.debug("{0} done.", config.identifier.descriptor);
-
-            config.lastLaunch = config.scheduledDateTime;
         }
 
         protected override void cancel()
@@ -66,7 +71,6 @@ namespace Awful.Scheduler
             {
                 target.Create();
             }
-            // Go through the Directories and recursively call Copy Method for each one
             foreach (DirectoryInfo dir in source.GetDirectories())
             {
                 if (shouldTerminate)
@@ -83,13 +87,12 @@ namespace Awful.Scheduler
                 }
             }
 
-            // Go ahead and copy each file to the target directory
             foreach (FileInfo file in source.GetFiles())
             {
                 if (shouldTerminate)
                 {
                     Logger.debug("receive TERMINATE signal, exiting...");
-                    break;
+                    return;
                 }
                 fileCopy(file, target, excludePatterns);
             }

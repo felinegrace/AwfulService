@@ -43,6 +43,7 @@
     <Compile Include="AwfulDatabaseBackupTask.cs" />
     <Compile Include="AwfulDatabaseCompositeBackupTask.cs" />
     <Compile Include="AwfulFileBackupTask.cs" />
+    <Compile Include="AwfulFileCleanTask.cs" />
     <Compile Include="AwfulScheduler.cs" />
     <Compile Include="AwfulTask.cs" />
     <Compile Include="AwfulTaskObserver.cs" />

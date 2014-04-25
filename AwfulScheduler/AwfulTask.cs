@@ -55,6 +55,7 @@ namespace Awful.Scheduler
 
         private void complete()
         {
+            getConfig().lastLaunch = getConfig().scheduledDateTime;
             this.observer.onTaskComplete(this.getConfig().identifier);
         }
 
