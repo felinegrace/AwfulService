@@ -1,0 +1,33 @@
+﻿<awfulConfig>
+
+  <task>
+    <type>file</type>
+    <name>a file task</name>
+    <respawnSpan>minutely</respawnSpan>
+    <fileBackupMethod>incremental</fileBackupMethod>
+    <launchDateTime>2014-4-15 11:00:00</launchDateTime>
+    <srcFolders>c:\src</srcFolders>
+    <dstFolders>c:\qqq</dstFolders>
+  </task>
+    
+  <task>
+    <type>database</type>
+    <name>a db task</name>
+    <respawnSpan>minutely</respawnSpan>
+    <methodAlternative>2</methodAlternative>
+    <databaseBackupMethod>composite</databaseBackupMethod>
+    <launchDateTime>2014-4-15 11:00:00</launchDateTime>
+    <databaseConnectionString>Server=.;Database=PsDbA201302;User ID=sa;Password=123456;</databaseConnectionString>
+    <dstFile>c:\qqq\%d.bak</dstFile>
+  </task>
+
+  <task>
+    <type>clean</type>
+    <name>a clean task</name>
+    <respawnSpan>minutely</respawnSpan>
+    <expiration>0.0:5:0</expiration>
+    <launchDateTime>2014-4-15 11:00:00</launchDateTime>
+    <deleteEmptyFolder>true</deleteEmptyFolder>
+    <dstFolders>c:\qqq</dstFolders>
+  </task>
+</awfulConfig>

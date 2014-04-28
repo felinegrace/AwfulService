@@ -126,7 +126,7 @@ namespace Awful.Scheduler
         {
             if (config.fileBackupMethod == Enumeration.FileBackupMethod.INCREMENTAL)
             {
-                if (file.LastAccessTime < config.lastLaunch || file.LastAccessTime >= config.scheduledDateTime)
+                if (file.LastWriteTime < config.lastLaunch || file.LastWriteTime >= config.scheduledDateTime)
                 {
                     return false;
                 }
