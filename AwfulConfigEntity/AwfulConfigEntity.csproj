@@ -45,7 +45,7 @@
     <Compile Include="AwfulFileBackupConfig.cs" />
     <Compile Include="AwfulFileCleanConfig.cs" />
     <Compile Include="AwfulTaskConfigBase.cs" />
-    <Compile Include="Enumration.cs" />
+    <Compile Include="Enumeration.cs" />
     <Compile Include="Identifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
