@@ -57,6 +57,10 @@
       <Project>{fb12e36b-4ad7-4f29-906a-01a027bf1f5d}</Project>
       <Name>AwfulScheduler</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Configurator\Configurator.csproj">
+      <Project>{4b288763-cdc3-432b-b66e-a404bdeb5ae4}</Project>
+      <Name>Configurator</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utility\Utility.csproj">
       <Project>{ce2e99da-3866-44a1-9705-b9ce0055b04c}</Project>
       <Name>Utility</Name>
