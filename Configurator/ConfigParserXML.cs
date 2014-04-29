@@ -133,6 +133,11 @@ namespace Awful.Configurator
 
             config.methodAlternative = ConfigValidator.validateAndParseCompositeDatabaseBackupMethodAlternative
                 (xmlConfigObject.SelectSingleNode("methodAlternative").Value);
+
+            if(config.methodAlternative < 1)
+            {
+                throw new ConfigException("Configurator: methodAlternative must lager than 0.");
+            }
         }
 
         private AwfulTaskConfigBase parseXmlObjectAsFileCleanTaskConfig(XPathNavigator xmlConfigObject)

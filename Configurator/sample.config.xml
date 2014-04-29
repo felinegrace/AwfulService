@@ -1,33 +1,131 @@
-﻿<awfulConfig>
+﻿<!--- 
+配置文件基本格式
+在主标签下并列配置若干个任务项目
+如:
+<awfulConfig>    
+    <task>任务配置</task>
+    <task>任务配置</task>
+    <task>任务配置</task>
+</awfulConfig>    
 
+任务有三种类型
+1.文件备份     
+<type>file</type>
+这种类型的任务会定时按照一定的规则,将一批目录下(包含子目录)的所有文件复制到另一批目录下.
+
+2.数据库备份   
+<type>database</type>
+这种类型的任务会定时按照一定的规则,以T-SQL语句方式,将数据库备份为一个指定文件.
+
+3.文件清理     
+<type>clean</type>
+这种类型的任务可以清理磁盘上过期的备份文件.
+
+下面将详细介绍每一条配置项的作用和可选配置项.
+-->    
+<awfulConfig>
   <task>
+    
     <type>file</type>
-    <name>a file task</name>
-    <respawnSpan>minutely</respawnSpan>
-    <fileBackupMethod>incremental</fileBackupMethod>
+    <!--- 这是一个文件备份任务 -->
+    
+    <name>a file backup task</name>
+    <!--- 任务的名称,可以随意制定为一个文本串,并不用作唯一标识符 -->
+    
+    <respawnSpan>dayly</respawnSpan>
+    <!--- 任务的执行周期可选项为monthly,weekly,dayly 分别表示每月,每周,每天执行一次 -->
+    <!--- 也可以指定为once 表示只执行一次 -->
+    <!--- 参考配合下面的launchDateTime选项,来控制任务被执行的精确时间 -->
+    
     <launchDateTime>2014-4-15 11:00:00</launchDateTime>
-    <srcFolders>c:\src</srcFolders>
-    <dstFolders>c:\qqq</dstFolders>
+    <!--- 描述内容较多,可以直接看下一段的实例 -->
+
+    <!--- 描述 -->
+    <!--- 任务在每个周期内被执行的确切时间,"必须"以完整的日期-时间格式,包括间隔符号,即yyyy-mo-dd hh:mi:ss的形式指定-->
+    <!--- 配合上面的respawnSpan任务周期,控制任务被执行的精确时间,本配置项中大于周期的部分会被忽略 -->
+    <!--- 如周期制定为dayly,那么只有 时,分,秒 的部分生效,意义即为每天的该时刻执行该任务 -->
+    <!--- 如周期制定为weekly,那么只有 日,时,分,秒 的部分生效,以日项目决定周几执行,若该日为周一,意义即为每周一的该时刻执行该任务 -->
+    <!--- 如周期制定为monthly,那么只有 日,时,分,秒 的部分生效,以日项目决定每月几号执行,若该日为5号,意义即为每月5号的该时刻执行该任务 -->
+    <!--- 以上三项中,这个项目的所有部分还表示了首次被执行的确切日期 -->
+    <!--- 如周期制定为once,那么这个项目就表示该任务被调度的确切日期时间 -->  
+    <!--- 如果把本项目配置得比程序开始执行时间还要早,这个任务会被立即执行,但下次执行时间依旧按照配置项所述,而非根据执行时间 -->
+
+    <!--- 实例1 -->
+    <!--- 配置respawnSpan为dayly 配置launchDateTime为2014-4-15 11:00:00 -->
+    <!--- 程序在2014-4-14 21:00:00 启动 即程序启动时间 早于 配置项时间 -->
+    <!--- 那么该任务会在2014-4-15 11:00:00第一次被执行,此后每天的11:00:00执行一次 -->
+
+    <!--- 实例2 -->
+    <!--- 配置respawnSpan为dayly 配置launchDateTime为2014-4-15 11:00:00 -->
+    <!--- 程序在2014-4-16 19:00:00 启动 即程序启动时间 晚于 配置项时间 -->
+    <!--- 那么该任务会立即执行,第二次执行的时间为2014-4-17 11:00:00,此后每天的11:00:00执行一次 -->
+    
+    <fileBackupMethod>incremental</fileBackupMethod>
+    <!--- 备份模式,可选项为incremental,full 分别表示增量,完全备份 -->
+    <!--- 增量备份下,会根据文件的最后修改时间,把属于上次任务运行时间之后,到本次任务运行之前的所有文件备份 -->
+    <!--- 完全备份下,会备份所有文件 -->
+    
+    <srcFolders>c:\网站\upload</srcFolders>
+    <srcFolders>c:\照片\pics</srcFolders>
+    <dstFolders>c:\备份目录\网站\%d\</dstFolders>
+    <dstFolders>c:\备份目录\照片\%d\</dstFolders>
+    <!--- 备份的源目录srcFolders和目标目录dstFolders,必须为目录,不可以是文件,可以指定多个,源与目标一一对应,即第一个源被备份到第一个目标 -->
+    <!--- 可以使用宏命令 %d 避免文件覆盖,%d会在程序执行时以yyyymmdd的格式转换为当前日期 -->
+    <!--- 如c:\%d\dir 在2014-4-15执行时会被自动转换为c:\20140415\dir -->
+
+    <!--- 歇一会儿~ 其他类型的任务与此大同小异:\\ -->
   </task>
     
   <task>
     <type>database</type>
-    <name>a db task</name>
-    <respawnSpan>minutely</respawnSpan>
-    <methodAlternative>2</methodAlternative>
-    <databaseBackupMethod>composite</databaseBackupMethod>
+    <!--- 这是一个数据库备份任务 -->
+    
+    <name>a database backup task</name>
+    <respawnSpan>dayly</respawnSpan>
     <launchDateTime>2014-4-15 11:00:00</launchDateTime>
+    <!--- 这三项与文件备份用途相同 -->
+
+    <databaseBackupMethod>composite</databaseBackupMethod>
+    <!--- 备份模式,可选项为differential, full, composite. 分别表示差异,完全,组合备份 -->
+    <!--- 差异备份/完全备份分别为在T-SQL中添加/不添加 "with differential" 的备份模式 -->
+    <!--- 这两种都是单调模式,如选择差异备份,用户需要额外添加一个配合用的完全备份的任务,或是用其他方式管理这些差异的完全备份版本. -->
+    <!--- 组合模式下,会轮流执行差异与完全备份,方式参照methodAlternative的设定. -->
+    
+    <methodAlternative>2</methodAlternative>
+    <!--- 组合模式下,指定以几次备份为一组,其中的第一次备份为完全备份,其余为差异备份. -->
+    <!--- 单调的差异备份/完全备份模式不需要这个参数. -->
+    <!--- 此参数设置必须大于0,等于1时,即和完全备份模式等价. -->
+    
     <databaseConnectionString>Server=.;Database=PsDbA201302;User ID=sa;Password=123456;</databaseConnectionString>
-    <dstFile>c:\qqq\%d.bak</dstFile>
+    <!--- 数据库的连接串 -->
+    
+    <dstFile>c:\%a\%d.bak</dstFile>
+    <!--- 数据库的备份文件完整名字 -->
+    <!--- 仅组合模式下,轮到执行完整备份时,会在末尾自动加".full",差异时保持原文件名 -->
+    <!--- 可以使用宏命令 %d 避免文件覆盖,%d会在程序执行时以yyyymmdd的格式转换为当前日期 -->
+    <!--- 如c:\%d\dir 在2014-4-15执行时会被自动转换为c:\20140415\dir -->
+    <!--- 仅组合模式下,可以使用宏命令 %a 进行分组,%a会在程序执行时以yyyymmdd的格式转换为本组首次完全备份时的日期 -->
+    <!--- 如c:\%a\%d\dir 在2014-4-15执行时,轮到了差异备份,这次差异备份对应的完全备份在2014-4-11时执行,会被自动转换为c:\20140411\20140415\dir -->
   </task>
 
   <task>
     <type>clean</type>
+    <!--- 这是一个数据库备份任务 -->
+    
     <name>a clean task</name>
-    <respawnSpan>minutely</respawnSpan>
-    <expiration>0.0:5:0</expiration>
+    <respawnSpan>dayly</respawnSpan>
     <launchDateTime>2014-4-15 11:00:00</launchDateTime>
-    <deleteEmptyFolder>true</deleteEmptyFolder>
+    <!--- 这三项与文件备份用途相同 -->
+    
+    <expiration>30.0:0:0</expiration>
+    <!--- 制定文件的过期时间,清理时根据文件的最后访问时间距今是否已经超过了设置的时限决定该文件是否被清理 -->
+    <!--- 格式必须为 dd.hh:mi:ss 注意日项目后的符号是点 -->
+    
+    <deleteEmptyFolder>false</deleteEmptyFolder>
+    <!--- 是否删除空文件夹,注意,无论是否由本清理任务造成的空文件夹都会被删除,包括指定的目录本身 -->
+    
     <dstFolders>c:\qqq</dstFolders>
+    <dstFolders>c:\www</dstFolders>
+    <!--- 需要清理的目标目录,必须是目录,不可以是文件,可以指定多个 -->
   </task>
 </awfulConfig>
